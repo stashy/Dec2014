@@ -1,0 +1,63 @@
+---
+title: "Regression Assignment samples of Exponentials"
+output: html_document
+---
+###Course assignment Instructions
+The exponential distribution can be simulated in R with rexp(n, lambda) where lambda is the rate parameter. The mean of exponential distribution is 1/lambda and the standard deviation is also also 1/lambda. Set lambda = 0.2 for all of the simulations. In this simulation, you will investigate the distribution of averages of 40 exponential(0.2)s. Note that you will need to do a thousand or so simulated averages of 40 exponentials.
+
+Illustrate via simulation and associated explanatory text the properties of the distribution of the mean of 40 exponential(0.2)s.  You should
+1. Show where the distribution is centered at and compare it to the theoretical center of the distribution.
+2. Show how variable it is and compare it to the theoretical variance of the distribution.
+3. Show that the distribution is approximately normal.
+
+Note that for point 3, focus on the difference between the distribution of a large collection of random exponentials and the distribution of a large collection of averages of 40 exponentials.
+### Solution 
+First use R to sample forty random exponentials of mean 5. The mean of a sample of
+40 random exponentials, is itself a random variable.  For this homework we will refer to this random variable (the mean of 40 exponentials) as "trialavg", and 
+will explore the the distribution of this "trialavg" random variable.
+
+
+The function "samp" creates one sample of forty exponentials and then takes mean. In other words, "samp" generates one instance of the "trialavg" random variable.  We apply this 
+function 1000 times to generate many trialavgs and create a histogram to get an idea of trialavg's distribuiton.
+```{r}
+set.seed(5)
+l<-0.2
+samp<-function(ssize){x<-mean(rexp(ssize,l)); return(x)}
+taforty<-sapply(rep(40,1000),samp)                #many trialavg's 
+hist(Taforty,prob=TRUE, main="Hist of trial avg (of Exponential samples n=40)")
+lines(density(taforty))
+
+```
+### Center of trialavg 
+Since "trialavg" is an average of random variables each with expected value of 5, the theoretical expected value of the "trialavg" is also 5. We check the mean of our 1000 generated instances of trial average and find that it is close.
+```{r}
+
+mean(taforty)
+
+```
+### Variability
+As with central tendency, we can predict the theoretical variance of "trialavg".  Since the
+exponentials have variance 25 (= 1/ lambda^2), the variance of the mean of sample of forty should be 25*40/40^2 = 25/40.
+ 
+We check the variance of "trialavg" using the 1000 generated instances.
+
+```{r}
+var(taforty)
+25/40  # theoretical variance
+```
+The distribution of "trial means" does have an almost normal curve shape.
+
+
+```{r, echo=FALSE}
+singles<-sapply(rep(1,10000),samp)
+tens<-sapply(rep(10,1000),samp)
+eights<-sapply(rep(100,1000),samp)
+par(mfrow=c(2,2))
+
+hist(singles,prob=TRUE, main="n=1");lines(density(singles))
+hist(tens,prob=TRUE, main="n=10");lines(density(tens))
+hist(taforty,prob=TRUE, main="n=40");lines(density(taforty))
+hist(eights,prob=TRUE, main="n=100");lines(density(eights))
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
