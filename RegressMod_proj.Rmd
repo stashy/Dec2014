@@ -78,13 +78,29 @@ as.factor(mtcars$am)->mtcars$am
 as.factor(mtcars$carb)->mtcars$carb
 library(ggplot2)
 ```
-2) One makes a few quick plots which show generally that gear,cyl,drat,carb and hp are
-highly correlated with weight, and it is weight which drives mpg most. These variables 
+2) ?mtcars gives info about 
+[, 1]      mpg	Miles/(US) gallon
+[, 2]	cyl	Number of cylinders
+[, 3]	disp	Displacement (cu.in.)
+[, 4]	hp	Gross horsepower
+[, 5]	drat	Rear axle ratio
+[, 6]	wt	Weight (lb/1000)
+[, 7]	qsec	1/4 mile time
+[, 8]	vs	V/S
+[, 9]	am	Transmission (0 = automatic, 1 = manual)
+[,10]	gear	Number of forward gears
+[,11]	carb	Number of carburetors
+
+One makes a few quick plots which show generally that 
+gear,
+cyl,
+drat,
+carb 
+and hp are  highly correlated with weight, and it is weight which drives mpg most. These variables 
 do not need to be included in the linear model therefore. 
 Variable vs can probably also be eliminated from model.
 
 ```{r}
-qplot(x=wt, y=mpg, data=mtcars, color=am, geom=c("point","smooth"),facets=vs~carb)
 qplot(x=wt, y=mpg, data=mtcars, color=gear, geom=c("point"),main="mpg by wt", ,size=I(3),alpha=I(0.6))
 qplot(x=wt, y=mpg, data=mtcars, color=am, geom=c("point"),main="drat", facets=cyl~.,size=I(3),alpha=I(0.6))
 
@@ -99,24 +115,79 @@ Actual linear model is
 ```{r}
 fit<-lm(formula=mpg ~ wt + am, data=mtcars)
 fit$coefficient
-
+summary(fit)
 ```
 The regression tells us that at at zero weight, the mpg is 37, and that as 
-weight increases, the mpg falls steeply.  Having am=1 decreases fuel efficiently very slightly.
-(Common knowlegge tells us that manual shifts are more common in small cars than in large cars, so we will interpret am=1 as meaning stick shift, whereas am=0 must mean automatic transmission)
+weight increases, the mpg falls steeply.  Having am=1 decreases fuel efficiently very slightly. However this is not at all significant.  Look at residuals to
+find some other explanatory variable.
 
 
 ----
 4) Look at residuals. 
 We deliberately left out many of the variables available when regressing on fuel efficiency in mpg. Here we will check the residualas to see if these variables actually do have something to offer to the regression model.  If there is no obvious pattern in the residuals by these other variables, then it is appropriate to keep them out of the model.
-
+Residuals with patterns:
 ```{r}
-qplot(x=wt, y=fit$residuals, data=mtcars,color=gear, geom=c("point"),main="mpg by wt", ,size=I(3),alpha=I(0.6))
-qplot(x=wt, y=fit$residuals, data=mtcars,color=cyl, geom=c("point"),main="mpg by wt", ,size=I(3),alpha=I(0.6))
-qplot(x=wt, y=fit$residuals, data=mtcars,color=hp, geom=c("point"),main="mpg by wt", ,size=I(3),alpha=I(0.6))
-qplot(x=wt, y=fit$residuals, data=mtcars,color=disp, geom=c("point"),main="mpg by wt", ,size=I(3),alpha=I(0.6))
+
+
 qplot(x=wt, y=fit$residuals, data=mtcars,color=vs, geom=c("point"),main="mpg by wt", ,size=I(3),alpha=I(0.6))
+qplot(x=wt, y=fit$residuals, data=mtcars,color=qsec, geom=c("point"),main="mpg by wt", ,size=I(3),alpha=I(0.6))
+
+
 
 ```
  
+5) Re-Regression y=mpg  on x= am and wt and vs or  qsec
+control;  Interpret coefficients
+
+```{r}
+qplot(x=wt,y=mpg,data=mtcars,color=qsec, geom=c("smooth","point"),method='lm',formula= y~ x ,main="mpg by wt with am and qsec", facets=.~am,size=I(3),alpha=I(0.6))
+
+qplot(x=wt,y=mpg,data=mtcars,color=vs, geom=c("smooth","point"),method='lm',formula= y~ x ,main="mpg by wt with am and vs", facets=.~am,size=I(3),alpha=I(0.6))
+
+qplot(x=wt,y=mpg,data=mtcars,color=cyl, geom=c("smooth","point"),method='lm',formula= y~ x ,main="mpg by wt with am and cyl", facets=.~am,size=I(3),alpha=I(0.6))
+```
+Actual linear model is 
+```{r}
+fit1<-lm(formula=mpg ~ wt + am + qsec, data=mtcars)
+fit1$coefficient
+
+fit2<-lm(formula=mpg ~ wt + am + vs, data=mtcars)
+fit2$coefficient
+
+fit3<-lm(formula=mpg ~ wt + am + cyl, data=mtcars)
+fit3$coefficient
+
+fit4<-lm(formula=mpg ~ wt + am + hp, data=mtcars)
+fit4$coefficient
+
+
+summary(fit1)
+summary(fit2)
+
+summary(fit3)
+summary(fit4)
+
+```
+
+
+
+
+
+
+
+
+4 Reject--=Residuals Without patterns:
+
+```{r}
+qplot(x=wt, y=fit$residuals, data=mtcars,color=cyl, geom=c("point"),main="mpg by wt", ,size=I(3),alpha=I(0.6))
+
+qplot(x=wt, y=fit$residuals, data=mtcars,color=hp, geom=c("point"),main="mpg by wt", ,size=I(3),alpha=I(0.6))
+qplot(x=wt, y=fit$residuals, data=mtcars,color=gear, geom=c("point"),main="mpg by wt", ,size=I(3),alpha=I(0.6))
+qplot(x=wt, y=fit$residuals, data=mtcars,color=disp, geom=c("point"),main="mpg by wt", ,size=I(3),alpha=I(0.6))
+qplot(x=wt, y=fit$residuals, data=mtcars,color=drat, geom=c("point"),main="mpg by wt", ,size=I(3),alpha=I(0.6))
+
+qplot(x=wt, y=fit$residuals, data=mtcars,color=carb, geom=c("point"),main="mpg by wt", ,size=I(3),alpha=I(0.6))
+```
+
+
 
